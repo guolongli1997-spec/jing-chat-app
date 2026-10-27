@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -51,33 +52,58 @@
 				flex-direction: column;
 				padding-top: env(safe-area-inset-top, 0px);
 				-webkit-text-size-adjust: 100%;
+				position: relative;
 			}
 
 			header {
 				flex: none;
 				display: flex;
 				align-items: center;
-				gap: 10px;
-				min-height: 44px;
+				justify-content: space-between;
+				min-height: 52px;
 				padding: 0 14px;
 				border-bottom: 1px solid var(--border-color);
 			}
 
+			.header-left {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
 			.mark {
-				width: 22px;
-				height: 22px;
+				width: 26px;
+				height: 26px;
 				border-radius: 7px;
 				background: var(--primary-color);
 				color: var(--primary-ink);
 				display: grid;
 				place-items: center;
 				font-weight: 700;
-				font-size: 13px;
+				font-size: 14px;
 			}
 
 			h1 {
 				font-size: 15px;
 				font-weight: 600;
+			}
+
+			/* Header Login/Signup Button */
+			.auth-btn {
+				background-color: var(--surface);
+				color: var(--primary-color);
+				border: 1px solid var(--primary-color);
+				padding: 6px 14px;
+				border-radius: 20px;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+
+			.auth-btn:hover {
+				background-color: var(--primary-color);
+				color: var(--primary-ink);
 			}
 
 			.chat-container {
@@ -205,12 +231,158 @@
 				outline: 2px solid var(--primary-color);
 				outline-offset: 2px;
 			}
+
+			/* Modal Styles */
+			.modal-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.7);
+				backdrop-filter: blur(4px);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 1000;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.25s ease;
+				padding: 16px;
+			}
+
+			.modal-overlay.active {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.modal-card {
+				background: var(--surface);
+				border: 1px solid var(--border-color);
+				width: 100%;
+				max-width: 380px;
+				border-radius: 16px;
+				padding: 24px;
+				box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+				position: relative;
+				transform: translateY(15px);
+				transition: transform 0.25s ease;
+			}
+
+			.modal-overlay.active .modal-card {
+				transform: translateY(0);
+			}
+
+			.close-btn {
+				position: absolute;
+				top: 16px;
+				right: 16px;
+				background: transparent;
+				border: none;
+				color: var(--text-light);
+				font-size: 20px;
+				cursor: pointer;
+				line-height: 1;
+			}
+
+			.close-btn:hover {
+				color: var(--text-color);
+			}
+
+			/* Auth Tabs */
+			.auth-tabs {
+				display: flex;
+				gap: 12px;
+				border-bottom: 1px solid var(--border-color);
+				margin-bottom: 20px;
+			}
+
+			.tab-btn {
+				background: none;
+				border: none;
+				color: var(--text-light);
+				font-size: 15px;
+				font-weight: 600;
+				padding-bottom: 8px;
+				cursor: pointer;
+				position: relative;
+			}
+
+			.tab-btn.active {
+				color: var(--primary-color);
+			}
+
+			.tab-btn.active::after {
+				content: '';
+				position: absolute;
+				bottom: -1px;
+				left: 0;
+				width: 100%;
+				height: 2px;
+				background-color: var(--primary-color);
+				border-radius: 2px;
+			}
+
+			.form-group {
+				margin-bottom: 16px;
+			}
+
+			.form-group label {
+				display: block;
+				font-size: 13px;
+				color: var(--text-light);
+				margin-bottom: 6px;
+			}
+
+			.form-group input {
+				width: 100%;
+				padding: 10px 14px;
+				background: var(--bg);
+				border: 1px solid var(--border-color);
+				border-radius: 8px;
+				color: var(--text-color);
+				font-size: 14px;
+				outline: none;
+			}
+
+			.form-group input:focus {
+				border-color: var(--primary-color);
+			}
+
+			.submit-btn {
+				width: 100%;
+				padding: 11px;
+				background: var(--primary-color);
+				color: var(--primary-ink);
+				border: none;
+				border-radius: 8px;
+				font-weight: 600;
+				font-size: 15px;
+				cursor: pointer;
+				margin-top: 8px;
+				transition: opacity 0.2s;
+			}
+
+			.submit-btn:hover {
+				opacity: 0.9;
+			}
+
+			.auth-form {
+				display: none;
+			}
+
+			.auth-form.active {
+				display: block;
+			}
 		</style>
 	</head>
 	<body>
 		<header>
-			<div class="mark">A</div>
-			<h1>Cloudflare AI Chat</h1>
+			<div class="header-left">
+				<div class="mark">A</div>
+				<h1>Cloudflare AI Chat</h1>
+			</div>
+			<button class="auth-btn" id="open-auth-btn">Login / Sign Up</button>
 		</header>
 
 		<div class="chat-container">
@@ -248,6 +420,93 @@
 			</div>
 		</div>
 
+		<!-- Popup Modal Registration & Login Form -->
+		<div class="modal-overlay" id="auth-modal">
+			<div class="modal-card">
+				<button class="close-btn" id="close-modal-btn">&times;</button>
+				
+				<div class="auth-tabs">
+					<button class="tab-btn active" onclick="switchTab('login')">Login</button>
+					<button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+				</div>
+
+				<!-- Login Form -->
+				<form id="login-form" class="auth-form active" onsubmit="handleAuthSubmit(event, 'Login')">
+					<div class="form-group">
+						<label for="login-email">Email Address</label>
+						<input type="email" id="login-email" placeholder="example@domain.com" required />
+					</div>
+					<div class="form-group">
+						<label for="login-password">Password</label>
+						<input type="password" id="login-password" placeholder="••••••••" required />
+					</div>
+					<button type="submit" class="submit-btn">Login</button>
+				</form>
+
+				<!-- Registration Form -->
+				<form id="signup-form" class="auth-form" onsubmit="handleAuthSubmit(event, 'Registration')">
+					<div class="form-group">
+						<label for="signup-name">Full Name</label>
+						<input type="text" id="signup-name" placeholder="John Doe" required />
+					</div>
+					<div class="form-group">
+						<label for="signup-email">Email Address</label>
+						<input type="email" id="signup-email" placeholder="example@domain.com" required />
+					</div>
+					<div class="form-group">
+						<label for="signup-password">Password</label>
+						<input type="password" id="signup-password" placeholder="••••••••" required />
+					</div>
+					<button type="submit" class="submit-btn">Create Account</button>
+				</form>
+			</div>
+		</div>
+
+		<script>
+			// Modal Toggle Logic
+			const authModal = document.getElementById('auth-modal');
+			const openAuthBtn = document.getElementById('open-auth-btn');
+			const closeModalBtn = document.getElementById('close-modal-btn');
+
+			openAuthBtn.addEventListener('click', () => {
+				authModal.classList.add('active');
+			});
+
+			closeModalBtn.addEventListener('click', () => {
+				authModal.classList.remove('active');
+			});
+
+			// Close modal on clicking outside card
+			authModal.addEventListener('click', (e) => {
+				if (e.target === authModal) {
+					authModal.classList.remove('active');
+				}
+			});
+
+			// Switch between Login and Sign Up tabs
+			function switchTab(type) {
+				const tabs = document.querySelectorAll('.tab-btn');
+				const forms = document.querySelectorAll('.auth-form');
+
+				tabs.forEach(tab => tab.classList.remove('active'));
+				forms.forEach(form => form.classList.remove('active'));
+
+				if (type === 'login') {
+					tabs[0].classList.add('active');
+					document.getElementById('login-form').classList.add('active');
+				} else {
+					tabs[1].classList.add('active');
+					document.getElementById('signup-form').classList.add('active');
+				}
+			}
+
+			// Dummy Form Submit Handler
+			function handleAuthSubmit(event, formType) {
+				event.preventDefault();
+				alert(`${formType} successful!`);
+				authModal.classList.remove('active');
+			}
+		</script>
 		<!-- Chat app script -->
 		<script src="chat.js"></script>
 	</body>
