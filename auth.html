@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlyTripVisa — Sign in or Create an Account</title>
+  <meta name="description" content="Log in or create your FlyTripVisa account." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  { 950:'#000000', 900:'#0a0a0a', 850:'#0f0f0f', 800:'#161616', 700:'#1f1f1f', 600:'#2a2a2a', 500:'#3a3a3a' },
+            accent: { DEFAULT:'#3b82f6', dark:'#2563eb', light:'#60a5fa' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background:#000; }
+    .form-panel { transition: opacity .4s ease, transform .4s ease; }
+    .hidden-panel { opacity:0; transform:translateY(10px); pointer-events:none; position:absolute; inset:0; }
+    .visible-panel { opacity:1; transform:translateY(0); position:relative; }
+    .toggle-knob { transition: transform .35s cubic-bezier(.4,0,.2,1); }
+    .field:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.18); background:#0f0f0f; }
+    .field { transition: border-color .2s, box-shadow .2s, background .2s; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp .55s ease both; }
+    ::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px}
+    .spinner{border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;width:16px;height:16px;animation:spin .6s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body class="min-h-screen bg-ink-950 text-slate-200 flex items-center justify-center p-4">
+
+  <div class="w-full max-w-md fade-up">
+
+    <!-- Brand -->
+    <div class="text-center mb-7">
+      <a href="index.html" class="inline-flex items-center gap-2.5 text-2xl font-extrabold text-white">
+        <span class="w-10 h-10 rounded-xl bg-accent text-white grid place-items-center font-bold shadow-lg shadow-accent/30">F</span>
+        FlyTripVisa
+      </a>
+      <p class="text-sm text-slate-500 mt-2">Your visa journey, simplified.</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-ink-850 rounded-2xl border border-ink-700 shadow-2xl shadow-black/60 p-6 sm:p-8">
+
+      <!-- Toggle -->
+      <div class="relative flex bg-ink-800 rounded-xl p-1 mb-7" role="tablist" aria-label="Auth mode">
+        <span id="toggle-pill" class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] bg-accent rounded-lg shadow-lg shadow-accent/30 toggle-knob"></span>
+        <button id="tab-login" onclick="switchTab('login')"
+          class="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 text-white">
+          Log in
+        </button>
+        <button id="tab-signup" onclick="switchTab('signup')"
+          class="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 text-slate-400">
+          Sign up
+        </button>
+      </div>
+
+      <!-- Panels -->
+      <div class="relative min-h-[360px]">
+
+        <!-- LOGIN -->
+        <div id="panel-login" class="form-panel visible-panel">
+          <h2 class="text-xl font-bold text-white mb-1">Welcome back 👋</h2>
+          <p class="text-sm text-slate-500 mb-6">Enter your credentials to access your account.</p>
+
+          <form id="login-form" class="space-y-4" onsubmit="return handleSubmit(event,'login')">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">Email address</label>
+              <input type="email" name="email" required autocomplete="email" placeholder="you@example.com"
+                class="field w-full px-4 py-3 rounded-lg border border-ink-600 bg-ink-800 text-sm text-white placeholder-slate-600 outline-none" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-sm font-medium text-slate-300">Password</label>
+                <a href="#" class="text-xs text-accent-light hover:underline">Forgot password?</a>
+              </div>
+              <div class="relative">
+                <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••"
+                  class="field w-full px-4 py-3 pr-11 rounded-lg border border-ink-600 bg-ink-800 text-sm text-white placeholder-slate-600 outline-none" />
+                <button type="button" onclick="togglePassword(this)" aria-label="Show password"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </button>
+              </div>
+            </div>
+            <label class="flex items-center gap-2 text-sm text-slate-400 select-none">
+              <input type="checkbox" name="remember" class="w-4 h-4 rounded border-ink-500 bg-ink-800 text-accent focus:ring-accent focus:ring-offset-ink-850" />
+              Remember me for 30 days
+            </label>
+            <button type="submit"
+              class="w-full py-3 rounded-lg bg-accent hover:bg-accent-dark text-white font-semibold text-sm transition shadow-lg shadow-accent/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <span class="btn-label">Log in</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- SIGNUP -->
+        <div id="panel-signup" class="form-panel hidden-panel">
+          <h2 class="text-xl font-bold text-white mb-1">Create your account ✈️</h2>
+          <p class="text-sm text-slate-500 mb-6">Join FlyTripVisa and start your application in minutes.</p>
+
+          <form id="signup-form" class="space-y-4" onsubmit="return handleSubmit(event,'signup')">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">Full name</label>
+              <input type="text" name="name" required autocomplete="name" placeholder="Jane Doe"
+                class="field w-full px-4 py-3 rounded-lg border border-ink-600 bg-ink-800 text-sm text-white placeholder-slate-600 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">Email address</label>
+              <input type="email" name="email" required autocomplete="email" placeholder="you@example.com"
+                class="field w-full px-4 py-3 rounded-lg border border-ink-600 bg-ink-800 text-sm text-white placeholder-slate-600 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+              <div class="relative">
+                <input type="password" name="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"
+                  class="field w-full px-4 py-3 pr-11 rounded-lg border border-ink-600 bg-ink-800 text-sm text-white placeholder-slate-600 outline-none" />
+                <button type="button" onclick="togglePassword(this)" aria-label="Show password"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </button>
+              </div>
+            </div>
+            <label class="flex items-start gap-2 text-xs text-slate-500 select-none">
+              <input type="checkbox" name="terms" required class="mt-0.5 w-4 h-4 rounded border-ink-500 bg-ink-800 text-accent focus:ring-accent" />
+              <span>I agree to the <a href="#" class="text-accent-light hover:underline">Terms of Service</a> and <a href="#" class="text-accent-light hover:underline">Privacy Policy</a>.</span>
+            </label>
+            <button type="submit"
+              class="w-full py-3 rounded-lg bg-accent hover:bg-accent-dark text-white font-semibold text-sm transition shadow-lg shadow-accent/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <span class="btn-label">Create account</span>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 my-6">
+        <span class="flex-1 h-px bg-ink-700"></span>
+        <span class="text-xs font-medium text-slate-600 uppercase tracking-wide">or continue with</span>
+        <span class="flex-1 h-px bg-ink-700"></span>
+      </div>
+
+      <!-- Social -->
+      <div class="grid grid-cols-3 gap-3">
+        <!-- Google -->
+        <button onclick="socialAuth('google')" aria-label="Continue with Google"
+          class="flex items-center justify-center py-2.5 rounded-lg border border-ink-600 bg-ink-800 hover:bg-ink-700 hover:border-ink-500 transition">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        </button>
+        <!-- Facebook -->
+        <button onclick="socialAuth('facebook')" aria-label="Continue with Facebook"
+          class="flex items-center justify-center py-2.5 rounded-lg border border-ink-600 bg-ink-800 hover:bg-[#1877F2]/15 hover:border-[#1877F2]/40 transition">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </button>
+        <!-- Instagram -->
+        <button onclick="socialAuth('instagram')" aria-label="Continue with Instagram"
+          class="flex items-center justify-center py-2.5 rounded-lg border border-ink-600 bg-ink-800 hover:bg-[#E1306C]/15 hover:border-[#E1306C]/40 transition">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFDC80"/><stop offset="25%" stop-color="#FCAF45"/><stop offset="50%" stop-color="#F77737"/><stop offset="75%" stop-color="#E1306C"/><stop offset="100%" stop-color="#833AB4"/></linearGradient></defs><path fill="url(#ig)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </button>
+      </div>
+
+      <p class="text-center text-xs text-slate-600 mt-6">
+        By continuing you agree to our
+        <a href="#" class="text-accent-light hover:underline">Terms</a> &amp;
+        <a href="#" class="text-accent-light hover:underline">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ---- Tab switching ----
+    function switchTab(mode) {
+      const pill      = document.getElementById('toggle-pill');
+      const loginTab  = document.getElementById('tab-login');
+      const signupTab = document.getElementById('tab-signup');
+      const loginP    = document.getElementById('panel-login');
+      const signupP   = document.getElementById('panel-signup');
+
+      if (mode === 'signup') {
+        pill.style.transform = 'translateX(100%)';
+        loginTab.className  = 'relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 text-slate-400';
+        signupTab.className = 'relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 text-white';
+        loginP.className  = 'form-panel hidden-panel';
+        signupP.className = 'form-panel visible-panel';
+      } else {
+        pill.style.transform = 'translateX(0)';
+        signupTab.className = 'relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 text-slate-400';
+        loginTab.className  = 'relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 text-white';
+        signupP.className = 'form-panel hidden-panel';
+        loginP.className  = 'form-panel visible-panel';
+      }
+      sessionStorage.setItem('ftv_preferred_tab', mode);
+    }
+
+    // ---- Password visibility ----
+    function togglePassword(btn) {
+      const input = btn.previousElementSibling;
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // ---- Loading state ----
+    function setLoading(form, loading) {
+      const btn = form.querySelector('button[type=submit]');
+      const label = btn.querySelector('.btn-label');
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span><span>Please wait…</span>';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="btn-label">' + (label?.textContent || 'Submit') + '</span>';
+      }
+    }
+
+    // ---- Form submit ----
+    async function handleSubmit(e, mode) {
+      e.preventDefault();
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form));
+      setLoading(form, true);
+
+      try {
+        const res = await fetch('/api/auth/' + mode, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(result.error || 'Authentication failed');
+
+        localStorage.setItem('ftv_auth_token', result.token);
+        localStorage.setItem('ftv_user', JSON.stringify(result.user || {}));
+        window.location.href = result.redirect || 'index.html';
+      } catch (err) {
+        setLoading(form, false);
+        alert(err.message);
+      }
+      return false;
+    }
+
+    // ---- Social auth ----
+    function socialAuth(provider) {
+      window.location.href = '/api/auth/oauth/' + provider;
+    }
+
+    // ---- Restore preferred tab ----
+    (function init() {
+      const urlMode = new URLSearchParams(location.search).get('mode');
+      const stored  = sessionStorage.getItem('ftv_preferred_tab');
+      const mode = urlMode || stored || 'login';
+      if (mode === 'signup') switchTab('signup');
+    })();
+  </script>
+</body>
+</html>
